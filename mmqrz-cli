@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+
+import optparse
+import os
+
+import mmqrz
+
+
+class Application(object):
+    usage = 'usage: %prog command args'
+
+    def __init__(self):
+        self.optparser = optparse.OptionParser(usage=self.usage)
+
+        self.optparser.add_option('--score', type=int, default=None,
+                                  dest='score',
+                                  help='queue score for qadd command')
+
+        (self.opts, self.args) = self.optparser.parse_args()
+
+    def run(self):
+        try:
+            proxy = Proxy(self.args[0], self.args[1:], self.opts)
+        except Exception, e:
+            print e
+            self.optparser.print_help()
+        else:
+            try:
+                proxy()
+            except Exception, e:
+                if not isinstance(e, IndexError):
+                    print e
+                    self.optparser.print_help()
+
+
+class Proxy(object):
+    def __init__(self, cmd, args, opts):
+        if not self._has_method(cmd):
+            raise Exception('command not found')
+
+        self.cmd = cmd
+        self.args = args
+        self.opts = opts
+
+        self._check_redis_env()
+        self.mmqrz = mmqrz.Mmqrz()
+        mmqrz.connect_db(os.environ['MMQRZ_REDIS_HOST'],
+                         int(os.environ['MMQRZ_REDIS_PORT']),
+                         int(os.environ['MMQRZ_REDIS_DB']))
+
+    def _check_redis_env(self):
+        for param in ('HOST', 'PORT', 'DB'):
+            key = 'MMQRZ_REDIS_%s' % param
+            if not key in os.environ:
+                raise Exception('Please set MMQRZ_REDIS_HOST,'
+                                ' MMQRZ_REDIS,PORT, MMQRZ_REDIS_DB')
+
+    def _has_method(self, method):
+        return hasattr(self, method) and callable(getattr(self, method))
+
+    def __call__(self):
+        getattr(self, self.cmd)(*self.args)
+
+    def qinit(self):
+        self.mmqrz.qinit()
+
+    def qadd(self, queue):
+        self.mmqrz.qadd(queue, self.opts.score)
+
+    def qrem(self, queue):
+        self.mmqrz.qrem(queue)
+
+    def enqueue(self, queue, task):
+        self.mmqrz.qget(queue).enqueue(task)
+
+    def dequeue(self, queue):
+        print self.mmqrz.qget(queue).dequeue()
+
+    def select(self):
+        print self.mmqrz.qselect().dequeue()
+
+    def info(self):
+        for queue in self.mmqrz.qall():
+            if queue.count():
+                print '%s (%d tasks)' % (queue, queue.count())
+                for task in queue.all():
+                    print ' - %s' % task
+            else:
+                print '%s (empty)' % queue
+
+if __name__ == '__main__':
+    app = Application()
+    app.run()
