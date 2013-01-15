@@ -1,10 +1,12 @@
-python-mmqrz
-============
-
 MiniMum Queue for Redis Zset
+============================
 
 
-mmqrz-cli
+## mmqrz-cli
+
+CLI interface for mmqrz
+
+### commands
 
 ```
 mmqrz-cli qinit
