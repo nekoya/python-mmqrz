@@ -9,7 +9,7 @@ from mmqrz import Mmqrz, Queue, MmqrzException, connect_db
 
 def test_connect_db():
     mmqrz = Mmqrz()
-    assert_raises(MmqrzException, mmqrz.qinit)
+    assert_raises(MmqrzException, mmqrz.qall)
 
 
 def test_queue():
@@ -69,7 +69,6 @@ def test_mmqrz():
         connect_db('localhost', tredis.port, 0)
 
         mmqrz = Mmqrz()
-        mmqrz.qinit()
         assert_queues(mmqrz.qall(), [])
 
         # add queues
@@ -114,7 +113,6 @@ def test_mmqrz_select():
             mountains.put('takao', 599)
 
         mmqrz = Mmqrz()
-        mmqrz.qinit()
 
         setup(mmqrz)
         queue = mmqrz.qselect()
