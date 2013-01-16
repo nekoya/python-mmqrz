@@ -71,7 +71,7 @@ class Queue(object):
         self.score = score
         self._key = ':'.join([self._prefix, name])
 
-    def __repr__(self):
+    def __str__(self):
         return '%s : %s' % (self.name, self.score)
 
     def enqueue(self, task, score=None):
@@ -103,5 +103,5 @@ class Task(object):
         self.value = value
         self.score = score
 
-    def __repr__(self):
+    def __str__(self):
         return '%s : %s' % (self.value, self.score)
