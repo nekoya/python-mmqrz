@@ -63,14 +63,14 @@ class Proxy(object):
     def __call__(self):
         getattr(self, self.cmd)(*self.args)
 
-    def qinit(self):
-        self.mmqrz.qinit()
-
     def qadd(self, queue):
         self.mmqrz.qadd(queue, self.opts.score)
 
     def qrem(self, queue):
         self.mmqrz.qrem(queue)
+
+    def qremall(self):
+        self.mmqrz.qremall()
 
     def put(self, queue, task):
         self.mmqrz.qget(queue).put(task)

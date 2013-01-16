@@ -27,11 +27,6 @@ def connect_db(host, port, database):
 class Mmqrz(object):
     _queues = 'mmqrz:queues'
 
-    def qinit(self):
-        for queue in self.qall():
-            self.qrem(queue.name)
-        db.delete(self._queues)
-
     def qadd(self, name, score=None):
         if score is None:
             score = 10
@@ -42,6 +37,11 @@ class Mmqrz(object):
         queue = self.qget(name)
         queue.clear()
         db.zrem(self._queues, name)
+
+    def qremall(self):
+        for queue in self.qall():
+            self.qrem(queue.name)
+        db.delete(self._queues)
 
     def qall(self):
         return self._select(-1)
