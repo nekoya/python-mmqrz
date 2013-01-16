@@ -37,13 +37,6 @@ CLI interface for mmqrz
 ### commands
 
 ```
-mmqrz-cli qinit
-```
-
-initialize queue table and remove all exists queues.
-
-
-```
 mmqrz-cli qadd {queue} [--score=10]
 ```
 
@@ -58,7 +51,14 @@ remove queue
 
 
 ```
-mmqrz-cli enqueue {queue} {task}
+mmqrz-cli qremall
+```
+
+remove all queues
+
+
+```
+mmqrz-cli put {queue} {task}
 ```
 
 register task to queue
@@ -67,7 +67,7 @@ task stores with UNIXTIME
 
 
 ```
-mmqrz-cli dequeue {queue}
+mmqrz-cli get {queue}
 ```
 
 dequeue task from queue
@@ -90,11 +90,10 @@ show all queues and tasks
 ## example
 
 ```
-$ mmqrz-cli qinit
 $ mmqrz-cli qadd fruits
-$ mmqrz-cli enqueue apple
-$ mmqrz-cli enqueue banana
-$ mmqrz-cli enqueue orange
+$ mmqrz-cli put fruits apple
+$ mmqrz-cli put fruits banana
+$ mmqrz-cli put fruits orange
 $ mmqrz-cli info
 fruits : 10.0 (3 tasks)
  - apple : 1358233522.0
