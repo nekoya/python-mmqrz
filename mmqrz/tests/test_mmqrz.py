@@ -21,23 +21,23 @@ def test_queue():
         eq_(queue.name, 'fruits')
         eq_(queue.score, 10)
 
-        queue.enqueue('apple')
-        queue.enqueue('banana')
-        queue.enqueue('orange')
-        eq_(queue.count(), 3)
+        queue.put('apple')
+        queue.put('banana')
+        queue.put('orange')
+        eq_(queue.qsize(), 3)
 
-        eq_(queue.dequeue().value, 'apple')
-        eq_(queue.dequeue().value, 'banana')
-        eq_(queue.dequeue().value, 'orange')
-        assert_raises(IndexError, queue.dequeue)
-        eq_(queue.count(), 0)
+        eq_(queue.get().value, 'apple')
+        eq_(queue.get().value, 'banana')
+        eq_(queue.get().value, 'orange')
+        assert_raises(IndexError, queue.get)
+        eq_(queue.qsize(), 0)
 
         # discard all tasks
-        queue.enqueue('apple')
-        queue.enqueue('banana')
-        eq_(queue.count(), 2)
+        queue.put('apple')
+        queue.put('banana')
+        eq_(queue.qsize(), 2)
         queue.clear()
-        eq_(queue.count(), 0)
+        eq_(queue.qsize(), 0)
 
 
 def test_queue_withscore():
@@ -51,14 +51,14 @@ def test_queue_withscore():
         queue = Queue('mountains', 20)
         eq_(queue.score, 20)
 
-        queue.enqueue('fuji', 3776)
-        queue.enqueue('takao', 599)
-        queue.enqueue('everest', 8848)
+        queue.put('fuji', 3776)
+        queue.put('takao', 599)
+        queue.put('everest', 8848)
 
-        assert_task(queue.dequeue(), 'takao', 599)
-        assert_task(queue.dequeue(), 'fuji', 3776)
-        assert_task(queue.dequeue(), 'everest', 8848)
-        assert_raises(IndexError, queue.dequeue)
+        assert_task(queue.get(), 'takao', 599)
+        assert_task(queue.get(), 'fuji', 3776)
+        assert_task(queue.get(), 'everest', 8848)
+        assert_raises(IndexError, queue.get)
 
 
 def test_mmqrz():
@@ -92,10 +92,10 @@ def test_mmqrz():
         assert_queues(mmqrz.qall(), [('mountains', 20.0), ('people', 5.0)])
 
         # qrem also delete tasks
-        people.enqueue('Mike')
-        eq_(people.count(), 1)
+        people.put('Mike')
+        eq_(people.qsize(), 1)
         mmqrz.qrem('people')
-        eq_(mmqrz.qadd('people').count(), 0)
+        eq_(mmqrz.qadd('people').qsize(), 0)
 
 
 def test_mmqrz_select():
@@ -104,14 +104,14 @@ def test_mmqrz_select():
 
         def setup(mmqrz):
             fruits = mmqrz.qadd('fruits', 200)
-            fruits.enqueue('apple')
+            fruits.put('apple')
 
             people = mmqrz.qadd('people', 150)
-            people.enqueue('Mike')
+            people.put('Mike')
 
             mountains = mmqrz.qadd('mountains', 100)
-            mountains.enqueue('fuji', 3776)
-            mountains.enqueue('takao', 599)
+            mountains.put('fuji', 3776)
+            mountains.put('takao', 599)
 
         mmqrz = Mmqrz()
         mmqrz.qinit()
@@ -119,16 +119,16 @@ def test_mmqrz_select():
         setup(mmqrz)
         queue = mmqrz.qselect()
         eq_(queue.name, 'fruits')
-        eq_(queue.dequeue().value, 'apple')
+        eq_(queue.get().value, 'apple')
 
         queue = mmqrz.qselect()
         eq_(queue.name, 'people')
-        eq_(queue.dequeue().value, 'Mike')
+        eq_(queue.get().value, 'Mike')
 
         queue = mmqrz.qselect()
         eq_(queue.name, 'mountains')
-        eq_(queue.dequeue().value, 'takao')
+        eq_(queue.get().value, 'takao')
 
         queue = mmqrz.qselect()
         eq_(queue.name, 'mountains')
-        eq_(queue.dequeue().value, 'fuji')
+        eq_(queue.get().value, 'fuji')

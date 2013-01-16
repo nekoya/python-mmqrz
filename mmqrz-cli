@@ -70,19 +70,19 @@ class Proxy(object):
     def qrem(self, queue):
         self.mmqrz.qrem(queue)
 
-    def enqueue(self, queue, task):
-        self.mmqrz.qget(queue).enqueue(task)
+    def put(self, queue, task):
+        self.mmqrz.qget(queue).put(task)
 
-    def dequeue(self, queue):
-        print self.mmqrz.qget(queue).dequeue()
+    def get(self, queue):
+        print self.mmqrz.qget(queue).get()
 
     def select(self):
-        print self.mmqrz.qselect().dequeue()
+        print self.mmqrz.qselect().get()
 
     def info(self):
         for queue in self.mmqrz.qall():
-            if queue.count():
-                print '%s (%d tasks)' % (queue, queue.count())
+            if queue.qsize():
+                print '%s (%d tasks)' % (queue, queue.qsize())
                 for task in queue.all():
                     print ' - %s' % task
             else:

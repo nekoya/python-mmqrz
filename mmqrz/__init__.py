@@ -48,7 +48,7 @@ class Mmqrz(object):
 
     def qselect(self):
         for queue in self.qall():
-            if queue.count():
+            if queue.qsize():
                 return queue
         raise IndexError('no jobs exists')
 
@@ -74,12 +74,12 @@ class Queue(object):
     def __str__(self):
         return '%s : %s' % (self.name, self.score)
 
-    def enqueue(self, task, score=None):
+    def put(self, task, score=None):
         if score is None:
             score = int(time())
         db.zadd(self._key, task, score)
 
-    def dequeue(self):
+    def get(self):
         task = self._select(0)[0]
         db.zrem(self._key, task.value)
         return task
@@ -87,7 +87,7 @@ class Queue(object):
     def clear(self):
         db.delete(self._key)
 
-    def count(self):
+    def qsize(self):
         return db.zcard(self._key)
 
     def all(self):
