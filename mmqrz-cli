@@ -2,6 +2,7 @@
 
 import optparse
 import os
+import sys
 
 import mmqrz
 
@@ -28,8 +29,9 @@ class Application(object):
             try:
                 proxy()
             except Exception, e:
+                print e
+                sys.exit(1)
                 if not isinstance(e, IndexError):
-                    print e
                     self.optparser.print_help()
 
 
